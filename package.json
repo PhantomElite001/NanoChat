@@ -1,5 +1,29 @@
 {
   "dependencies": {
-    "express": "^5.2.1"
-  }
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "fetch": "^1.1.0",
+    "node-fetch": "^3.3.2",
+    "openai": "^6.25.0"
+  },
+  "name": "nanochat",
+  "version": "1.0.0",
+  "description": "",
+  "main": "Index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/phantomelite001/nanochat.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/phantomelite001/nanochat/issues"
+  },
+  "homepage": "https://github.com/phantomelite001/nanochat#readme"
 }
