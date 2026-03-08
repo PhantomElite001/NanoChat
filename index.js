@@ -1,6 +1,9 @@
 const express = require('express');
 const dotenv = require("dotenv");
 const cors = require('cors');
+const bcrypt= require('bcryptjs');
+const jwt = require('jsonwebtoken');
+users=[]; //temporary storage
 
 dotenv.config();
 
@@ -13,9 +16,56 @@ const PORT = process.env.PORT || 3000;
 app.get("/", (req, res) => {
   res.json({ status: "NanoChat running 🚀" });
 });
+app.post('/register',async (req,res) =>{
+  const {name,password}= req.body;
+  if(!name || !password){
+    return res.status(400).json({error:"Missing fields"});
+  }
+  const hashedpasswrd = await bcrypt.hash(password,10);
+  users.push({name, password: hashedpasswrd});
+  res.json({message:"A new player has been added"});
+  
+});
+app.post("/login",async (req,res)=>{
+  const{name,password}=req.body;
+  if(!name ||!password){
+    return res.status(400).json({error:"Missing fields"});
+  }
+  const user= users.find(u =>u.name===name);
+  if(!user){
+    return res.status(401).json({error:"Invalid login"});
+  };
+  const valid= await bcrypt.compare(password,user.password);
+  if(!valid){
+    return res.status(401).json({error:"Invalid login"});
+  }
+  const token=jwt.sign({name},
+  process.env.JWT_SECRET,
+  {expiresIn:"48h"}
+  );
+  res.json({token});
+});
+function authorize(req,res,next){
+  const AuthHeader=req.headers.authorization;
+  if(!AuthHeader){
+    return res.status(401).json({error:"No token"});
+  }
+  try {
+    
+  const token = AuthHeader.split(' ')[1];
+  const decoded=jwt.verify(token,process.env.JWT_SECRET);
+  req.user=decoded;
+  next();
+  } catch (err) {
+    console.error('Error:', err);
+    return res.status(401).json({Error:"something's wrong"});
+    
+  }
+};
+
 
 // AI endpoint
-app.post("/chat", async (req, res) => {
+app.post("/chat", authorize ,async (req, res) => {
   try {
     const { message } = req.body;
 
