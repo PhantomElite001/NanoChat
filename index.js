@@ -26,6 +26,12 @@ app.post('/register',async (req,res) =>{
   res.json({message:"A new player has been added"});
   
 });
+const path = require('path');
+
+// Serve the frontend
+app.get('/app', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
 app.post("/login",async (req,res)=>{
   const{name,password}=req.body;
   if(!name ||!password){
@@ -48,6 +54,7 @@ app.post("/login",async (req,res)=>{
 function authorize(req,res,next){
   const AuthHeader=req.headers.authorization;
   if(!AuthHeader){
+    console.log("failed authorization");
     return res.status(401).json({error:"No token"});
   }
   try {
@@ -82,7 +89,7 @@ app.post("/chat", authorize ,async (req, res) => {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "openai/gpt-oss-20b", // example model — replace with one available on your key
+      model: "openai/gpt-oss-20b,
       messages: [
         { role: "user", content: message }
       ],
@@ -91,7 +98,7 @@ app.post("/chat", authorize ,async (req, res) => {
     }),
   }
 );
-
+    console.log("sent");
     const data = await response.json();
 
     res.json({
