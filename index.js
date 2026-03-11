@@ -3,7 +3,7 @@ const dotenv = require("dotenv");
 const cors = require('cors');
 const bcrypt= require('bcryptjs');
 const jwt = require('jsonwebtoken');
-users=[]; //temporary storage
+let users=[]; //temporary storage
 
 dotenv.config();
 
@@ -16,21 +16,26 @@ const PORT = process.env.PORT || 3000;
 app.get("/", (req, res) => {
   res.json({ status: "NanoChat running 🚀" });
 });
-app.post('/register',async (req,res) =>{
-  const {name,password}= req.body;
-  if(!name || !password){
-    return res.status(400).json({error:"Missing fields"});
-  }
-  const hashedpasswrd = await bcrypt.hash(password,10);
-  users.push({name, password: hashedpasswrd});
-  res.json({message:"A new player has been added"});
-  
-});
 const path = require('path');
 
 // Serve the frontend
 app.get('/app', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
+  res.sendFile(path.join(__dirname, 'Register.html'));
+});
+app.post('/register',async (req,res) =>{
+  const {name,password}= req.body;
+  if(!name || !password){
+    console.log("missing fields");
+    return res.status(400).json({error:"Missing fields"});
+  }
+  const hashedpasswrd = await bcrypt.hash(password,10);
+  users.push({name, password: hashedpasswrd});
+  if (!hashedpasswrd) {
+    console.log("hashing failed");
+    return res.status(402).json({error:'hashing faild'})
+  }
+  res.send("ok");
+  
 });
 app.post("/login",async (req,res)=>{
   const{name,password}=req.body;
@@ -89,7 +94,7 @@ app.post("/chat", authorize ,async (req, res) => {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "openai/gpt-oss-20b,
+      model: "openai/gpt-oss-20b",
       messages: [
         { role: "user", content: message }
       ],

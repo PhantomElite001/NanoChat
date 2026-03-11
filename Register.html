@@ -10,12 +10,38 @@
     <title>Document</title>
     <style>
         /* Minimal CSS Reset */
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        *, *::before, *::after  {
+          box-sizing: border-box; 
+          margin: 0; 
+          padding: 0; }
+ 
         body { font-family: system-ui, sans-serif; background: #fafbfc; color: #222; min-height: 100vh; line-height: 1.6; }
     </style>
 </head>
 <body>
   <h2>Register</h2>
-  <input id="name" >
+
+    <input id="user" placeholder="Username">
+    <input id="pass" type="password" placeholder="Password">
+    
+    <button onclick="Register()">Register</button>
+  <script>
+    const name=Document.getElementById('user').value;
+    const password=document.getElementById('pass').value;
+    const response= await fetch('https://localhost:3000/register',
+    {
+      Method:'POST',
+      headers:{"ContentType":"application/json"
+      },
+      body:JSON.stringify({name,password})
+      }
+    )
+    if (response!='ok') {
+      return "something went wrong";
+    };
+    window.location='Login.html';
+
+    
+  </script>
 </body>
 </html>

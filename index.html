@@ -7,7 +7,7 @@
     <title>NanoChat</title>
     <style>
         /* General body styling */
-body {
+    body{
   font-family: 'Arial', sans-serif;
   background-color: #f7f7f7;
   margin: 0;
@@ -22,7 +22,6 @@ body {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   height: 100vh;
 }
-
 h1 {
   text-align: center;
   color: #333;
@@ -76,6 +75,8 @@ button:hover {
 <body>
     <div id="container">
         <h1>NanoChat</h1>
+            
+          </object>
         <div id="chat"></div>
         <div id="main">
             <input type="text" id="input" placeholder="Type a message...">
@@ -90,6 +91,10 @@ button:hover {
 
             const message = input.value;
             if (!message) return;
+            const token= localStorage.getItem('token');
+            if(!token){
+              window.location="register.html";
+            };
 
             chat.innerHTML += `<p><b>You:</b> ${message}</p>`;
             input.value = "";
@@ -103,7 +108,7 @@ button:hover {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
-                    "Authorization"
+                    "Authorization": Bearer ${token}
                     },
                     body: JSON.stringify({ message }),
                 });
