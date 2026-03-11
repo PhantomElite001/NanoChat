@@ -4,6 +4,7 @@ const cors = require('cors');
 const bcrypt= require('bcryptjs');
 const jwt = require('jsonwebtoken');
 let users=[]; //temporary storage
+let chatHistories = {}; // stores conversation history per user
 
 dotenv.config();
 
@@ -22,6 +23,12 @@ const path = require('path');
 app.get('/app', (req, res) => {
   res.sendFile(path.join(__dirname, 'Register.html'));
 });
+app.get('/login', (req, res) => {
+  res.sendFile(path.join(__dirname, 'Login.html'));
+});
+app.get('/index', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
 app.post('/register',async (req,res) =>{
   const {name,password}= req.body;
   if(!name || !password){
@@ -29,11 +36,11 @@ app.post('/register',async (req,res) =>{
     return res.status(400).json({error:"Missing fields"});
   }
   const hashedpasswrd = await bcrypt.hash(password,10);
-  users.push({name, password: hashedpasswrd});
   if (!hashedpasswrd) {
     console.log("hashing failed");
     return res.status(402).json({error:'hashing faild'})
   }
+  users.push({name, password: hashedpasswrd});
   res.send("ok");
   
 });
@@ -80,10 +87,19 @@ function authorize(req,res,next){
 app.post("/chat", authorize ,async (req, res) => {
   try {
     const { message } = req.body;
+    const username = req.user.name;
 
     if (!message) {
       return res.status(400).json({ error: "Message is required." });
     }
+
+    // Initialize history for this user if it doesn't exist
+    if (!chatHistories[username]) {
+      chatHistories[username] = [];
+    }
+
+    // Add the new user message to their history
+    chatHistories[username].push({ role: "user", content: message });
 
     const response = await fetch(
   "https://api.groq.com/openai/v1/chat/completions",
@@ -95,26 +111,33 @@ app.post("/chat", authorize ,async (req, res) => {
     },
     body: JSON.stringify({
       model: "openai/gpt-oss-20b",
-      messages: [
-        { role: "user", content: message }
-      ],
-      temperature: 0.6,
-      max_tokens: 2000,
+      messages: chatHistories[username], // send full history
+      temperature: 0.7,
+      max_tokens: 500,
     }),
   }
 );
     console.log("sent");
     const data = await response.json();
+    const reply = data.choices?.[0]?.message?.content || "No response";
 
-    res.json({
-      reply: data.choices?.[0]?.message?.content || "No response"
-    });
+    // Add the assistant reply to history
+    chatHistories[username].push({ role: "assistant", content: reply });
+
+    res.json({ reply });
     console.log("hf-respons",data);
 
   } catch (err) {
     console.error("SERVER ERROR:", err);
     res.status(500).json({ error: "Server error." });
   }
+});
+
+// Clear chat history for a user
+app.post("/clear", authorize, (req, res) => {
+  const username = req.user.name;
+  chatHistories[username] = [];
+  res.json({ status: "History cleared" });
 });
 
 app.listen(PORT, () => {
