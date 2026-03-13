@@ -169,7 +169,7 @@
       const username = document.getElementById("user").value;
       const password = document.getElementById("pass").value;
 
-      const res = await fetch("http://localhost:3000/login", {
+      const res = await fetch("https://nanochat-6ypd.onrender.com/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: username, password })
