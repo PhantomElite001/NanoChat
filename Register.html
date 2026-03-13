@@ -4,48 +4,183 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="description" content="A new web page">
-    <meta name="robots" content="index, follow">
-    <link rel="icon" href="favicon.ico">
-    <title>Document</title>
+    <title>NanoChat — Register</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
     <style>
-        /* Minimal CSS Reset */
-        *, *::before, *::after  {
-          box-sizing: border-box; 
-          margin: 0; 
-          padding: 0; }
- 
-        body { font-family: system-ui, sans-serif; background: #fafbfc; color: #222; min-height: 100vh; line-height: 1.6; }
+      :root {
+        --bg: #0d0d0d;
+        --surface: #161618;
+        --surface2: #1e1e21;
+        --border: #2a2a2e;
+        --accent: #00e5ff;
+        --accent-dim: rgba(0, 229, 255, 0.08);
+        --text: #e8e8ec;
+        --text-dim: #666672;
+      }
+
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+
+      header {
+        position: fixed;
+        top: 0; left: 0; right: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px 24px;
+        border-bottom: 1px solid var(--border);
+        background: var(--surface);
+      }
+
+      header h1 {
+        font-family: 'Space Mono', monospace;
+        font-size: 1.1rem;
+        font-weight: 700;
+        letter-spacing: 0.15em;
+        color: var(--accent);
+        text-transform: uppercase;
+      }
+
+      header h1::before { content: '> '; opacity: 0.4; }
+
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 36px 32px;
+        width: 100%;
+        max-width: 380px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .card h2 {
+        font-family: 'Space Mono', monospace;
+        font-size: 1rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--accent);
+      }
+
+      .card h2::before { content: '> '; opacity: 0.4; }
+
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .field label {
+        font-family: 'Space Mono', monospace;
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--text-dim);
+      }
+
+      .field input {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 10px 16px;
+        color: var(--text);
+        font-size: 0.95rem;
+        font-family: 'Inter', sans-serif;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+
+      .field input:focus { border-color: var(--accent); }
+      .field input::placeholder { color: var(--text-dim); }
+
+      button {
+        background: var(--accent);
+        color: #000;
+        border: none;
+        border-radius: 10px;
+        padding: 11px 20px;
+        font-family: 'Space Mono', monospace;
+        font-size: 0.8rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        cursor: pointer;
+        transition: opacity 0.2s, transform 0.1s;
+        width: 100%;
+      }
+
+      button:hover  { opacity: 0.85; }
+      button:active { transform: scale(0.98); }
+
+      .footer-link {
+        text-align: center;
+        font-size: 0.82rem;
+        color: var(--text-dim);
+      }
+
+      .footer-link a {
+        color: var(--accent);
+        text-decoration: none;
+        opacity: 0.8;
+        transition: opacity 0.2s;
+      }
+
+      .footer-link a:hover { opacity: 1; }
     </style>
 </head>
 <body>
-  <h2>Register</h2>
 
-    <input id="user" placeholder="Username">
-    <input id="pass" type="password" placeholder="Password">
-    
-    <button onclick="Register()">Register
-    </button>
+  <header>
+    <h1>NanoChat</h1>
+  </header>
+
+  <div class="card">
+    <h2>Register</h2>
+
+    <div class="field">
+      <label for="user">Username</label>
+      <input id="user" type="text" placeholder="Choose a username">
+    </div>
+
+    <div class="field">
+      <label for="pass">Password</label>
+      <input id="pass" type="password" placeholder="Choose a password">
+    </div>
+
+    <button onclick="Register()">Register</button>
+
+    <p class="footer-link">Already have an account? <a href="/login">Login</a></p>
+  </div>
+
   <script>
     async function Register() {
-      // body...
-    const name=document.getElementById('user').value;
-    const password=document.getElementById('pass').value;
-    const response= await fetch('http://localhost:3000/register',
-    {
-      method:'POST',
-      headers:{"Content-Type":"application/json"
-      },
-      body:JSON.stringify({name,password})
-      }
-    )
-    if (response.status !== 200) {
-      return "something went wrong";
-    };
-    window.location='/login';
-    };
+      const name = document.getElementById('user').value;
+      const password = document.getElementById('pass').value;
 
-    
+      const response = await fetch('http://localhost:3000/register', {
+        method: 'POST',
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, password })
+      });
+
+      if (response.status !== 200) {
+        return "something went wrong";
+      }
+      window.location = '/login';
+    }
   </script>
+
 </body>
 </html>
