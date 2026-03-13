@@ -14,19 +14,17 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
 // Health check
-app.get("/", (req, res) => {
-  res.json({ status: "NanoChat running 🚀" });
-});
+app.get("/", (req, res) => res.redirect('/login'));
 const path = require('path');
 
 // Serve the frontend
-app.get('/app', (req, res) => {
+app.get('/register', (req, res) => {
   res.sendFile(path.join(__dirname, 'Register.html'));
 });
 app.get('/login', (req, res) => {
   res.sendFile(path.join(__dirname, 'Login.html'));
 });
-app.get('/index', (req, res) => {
+app.get('/app', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 app.post('/register',async (req,res) =>{
