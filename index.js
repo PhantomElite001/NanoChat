@@ -15,8 +15,12 @@ app.use(express.json());
 const PORT = process.env.PORT || 3000;
 // Health check
 app.get("/", (req, res) => res.redirect('/login'));
-const path = require('path');
+//Health check
+app.get("/check",(req,res)=>{
+  res.json({status:'Nanochat running smoothly'});
 
+});
+const path = require('path');
 // Serve the frontend
 app.get('/register', (req, res) => {
   res.sendFile(path.join(__dirname, 'Register.html'));

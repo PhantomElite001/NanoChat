@@ -166,6 +166,10 @@
 
   <script>
     async function login() {
+      const token=localStorage.getItem('token');
+      if(token){
+          return window.location="/app";
+};
       const username = document.getElementById("user").value;
       const password = document.getElementById("pass").value;
 
