@@ -3,7 +3,8 @@ const dotenv = require("dotenv");
 const cors = require('cors');
 const bcrypt= require('bcryptjs');
 const jwt = require('jsonwebtoken');
-users=[]; //temporary storage
+let users=[]; //temporary storage
+let chatHistories = {}; // stores conversation history per user
 
 dotenv.config();
 
@@ -13,17 +14,36 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
 // Health check
-app.get("/", (req, res) => {
-  res.json({ status: "NanoChat running 🚀" });
+app.get("/", (req, res) => res.redirect('/login'));
+//Health check
+app.get("/check",(req,res)=>{
+  res.json({status:'Nanochat running smoothly'});
+
+});
+const path = require('path');
+// Serve the frontend
+app.get('/register', (req, res) => {
+  res.sendFile(path.join(__dirname, 'Register.html'));
+});
+app.get('/login', (req, res) => {
+  res.sendFile(path.join(__dirname, 'Login.html'));
+});
+app.get('/app', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 app.post('/register',async (req,res) =>{
   const {name,password}= req.body;
   if(!name || !password){
+    console.log("missing fields");
     return res.status(400).json({error:"Missing fields"});
   }
   const hashedpasswrd = await bcrypt.hash(password,10);
+  if (!hashedpasswrd) {
+    console.log("hashing failed");
+    return res.status(401).json({error:'hashing faild'})
+  }
   users.push({name, password: hashedpasswrd});
-  res.json({message:"A new player has been added"});
+  res.send("ok");
   
 });
 app.post("/login",async (req,res)=>{
@@ -43,11 +63,16 @@ app.post("/login",async (req,res)=>{
   process.env.JWT_SECRET,
   {expiresIn:"48h"}
   );
+  if(!token){
+    console.log("token generation failed");
+    return res.status(500).json({error:"Token generation failed"});
+  };
   res.json({token});
 });
 function authorize(req,res,next){
   const AuthHeader=req.headers.authorization;
   if(!AuthHeader){
+    console.log("failed authorization");
     return res.status(401).json({error:"No token"});
   }
   try {
@@ -65,14 +90,22 @@ function authorize(req,res,next){
 
 
 // AI endpoint
-app.post("/chat", async (req, res) => {
+app.post("/chat", authorize, async (req, res) => {
   try {
     const { message } = req.body;
-    console.log("Received message:", message);
+    const username = req.user.name;
 
     if (!message) {
       return res.status(400).json({ error: "Message is required." });
     }
+
+    // Initialize history for this user if it doesn't exist
+    if (!chatHistories[username]) {
+      chatHistories[username] = [];
+    }
+
+    // Add the new user message to their history
+    chatHistories[username].push({ role: "user", content: message });
 
     const response = await fetch(
   "https://api.groq.com/openai/v1/chat/completions",
@@ -83,21 +116,21 @@ app.post("/chat", async (req, res) => {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "openai/gpt-oss-20b", // example model — replace with one available on your key
-      messages: [
-        { role: "user", content: message }
-      ],
-      temperature: 0.6,
-      max_tokens: 2000,
+      model: "openai/gpt-oss-20b",
+      messages: chatHistories[username], // send full history
+      temperature: 0.7,
+      max_tokens: 500,
     }),
   }
 );
-
+    console.log("sent");
     const data = await response.json();
+    const reply = data.choices?.[0]?.message?.content || "No response";
 
-    res.json({
-      reply: data.choices?.[0]?.message?.content || "No response"
-    });
+    // Add the assistant reply to history
+    chatHistories[username].push({ role: "assistant", content: reply });
+
+    res.json({ reply });
     console.log("hf-respons",data);
 
   } catch (err) {
@@ -105,6 +138,14 @@ app.post("/chat", async (req, res) => {
     res.status(500).json({ error: "Server error." });
   }
 });
+
+// Clear chat history for a user
+app.post("/clear", authorize, (req, res) => {
+  const username = req.user.name;
+  chatHistories[username] = [];
+  res.json({ status: "History cleared" });
+});
+
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

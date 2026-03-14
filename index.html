@@ -5,119 +5,260 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>NanoChat</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+
     <style>
-        /* General body styling */
-body {
-  font-family: 'Arial', sans-serif;
-  background-color: #f7f7f7;
-  margin: 0;
-  padding: 0;
-}
+      :root {
+        --bg: #0d0d0d;
+        --surface: #161618;
+        --surface2: #1e1e21;
+        --border: #2a2a2e;
+        --accent: #00e5ff;
+        --accent-dim: rgba(0, 229, 255, 0.08);
+        --you-bg: #1a2a3a;
+        --you-border: #1e4a6e;
+        --bot-bg: #1a1a1f;
+        --bot-border: #2a2a35;
+        --text: #e8e8ec;
+        --text-dim: #666672;
+        --thinking: #444450;
+      }
 
-#container {
-  margin: 0 auto;
-  padding: 20px;
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  height: 100vh;
-}
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-h1 {
-  text-align: center;
-  color: #333;
-  font-size: 2rem;
-}
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: var(--bg);
+        color: var(--text);
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
 
-#chat {
-  background-color: #f9f9f9;
-  padding: 20px;
-  margin-bottom: 20px;
-  min-height: 400px;
-  height: 60vh;
-  overflow-y: auto;
-  border-radius: 8px;
-}
+      /* Header */
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px 24px;
+        border-bottom: 1px solid var(--border);
+        background: var(--surface);
+        flex-shrink: 0;
+      }
 
-#chat p {
-  margin: 15px 0;
-}
+      header h1 {
+        font-family: 'Space Mono', monospace;
+        font-size: 1.1rem;
+        font-weight: 700;
+        letter-spacing: 0.15em;
+        color: var(--accent);
+        text-transform: uppercase;
+      }
 
-#main {
-  position: absolute;
-  bottom: 25px;
-  width:90vw;
-  display: flex;
-  gap: 20px;
-}
+      header h1::before {
+        content: '> ';
+        opacity: 0.4;
+      }
 
-input[type="text"] {
-  width: 80%;
-  padding: 10px;
-  border-radius: 25px;
-  border: 1px solid #ddd;
-  font-size: 1rem;
-}
+      /* Chat window */
+      #chat {
+        flex: 1;
+        overflow-y: auto;
+        padding: 24px 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        scrollbar-width: thin;
+        scrollbar-color: var(--border) transparent;
+      }
 
-button {
-  padding: 10px 15px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 25px;
-  cursor: pointer;
-}
+      #chat::-webkit-scrollbar { width: 4px; }
+      #chat::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
-button:hover {
-  background-color: #0056b3;
-}
+      /* Message bubbles */
+      .msg {
+        max-width: 75%;
+        padding: 10px 14px;
+        border-radius: 12px;
+        font-size: 0.92rem;
+        line-height: 1.6;
+        word-break: break-word;
+        animation: popIn 0.18s ease;
+      }
+
+      @keyframes popIn {
+        from { opacity: 0; transform: translateY(6px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+
+      .msg.you {
+        align-self: flex-end;
+        background: var(--you-bg);
+        border: 1px solid var(--you-border);
+        border-bottom-right-radius: 3px;
+        color: #a8d4f5;
+      }
+
+      .msg.bot {
+        align-self: flex-start;
+        background: var(--bot-bg);
+        border: 1px solid var(--bot-border);
+        border-bottom-left-radius: 3px;
+        color: var(--text);
+      }
+
+      /* Sender label */
+      .msg::before {
+        display: block;
+        font-family: 'Space Mono', monospace;
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        margin-bottom: 4px;
+        opacity: 0.5;
+      }
+
+      .msg.you::before { content: 'You'; color: var(--accent); }
+      .msg.bot::before { content: 'NanoChat'; color: #aaa; }
+
+      /* Thinking dots */
+      .thinking-dots {
+        display: inline-flex;
+        gap: 4px;
+        align-items: center;
+        height: 16px;
+      }
+
+      .thinking-dots span {
+        width: 5px;
+        height: 5px;
+        background: var(--thinking);
+        border-radius: 50%;
+        animation: bounce 1.2s infinite ease-in-out;
+      }
+
+      .thinking-dots span:nth-child(2) { animation-delay: 0.2s; }
+      .thinking-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+      @keyframes bounce {
+        0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+        40%            { transform: translateY(-5px); opacity: 1; }
+      }
+
+      /* Input area */
+      #main {
+        display: flex;
+        gap: 10px;
+        padding: 14px 20px;
+        border-top: 1px solid var(--border);
+        background: var(--surface);
+        flex-shrink: 0;
+      }
+
+      #input {
+        flex: 1;
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 10px 16px;
+        color: var(--text);
+        font-size: 0.95rem;
+        font-family: 'Inter', sans-serif;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+
+      #input:focus { border-color: var(--accent); }
+      #input::placeholder { color: var(--text-dim); }
+      #input:disabled { opacity: 0.5; cursor: not-allowed; }
+
+      #sendBtn {
+        background: var(--accent);
+        color: #000;
+        border: none;
+        border-radius: 10px;
+        padding: 10px 20px;
+        font-family: 'Space Mono', monospace;
+        font-size: 0.8rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        cursor: pointer;
+        transition: opacity 0.2s, transform 0.1s;
+        flex-shrink: 0;
+      }
+
+      #sendBtn:hover  { opacity: 0.85; }
+      #sendBtn:active { transform: scale(0.97); }
+      #sendBtn:disabled { opacity: 0.4; cursor: not-allowed; }
     </style>
 </head>
 <body>
-    <div id="container">
-        <h1>NanoChat</h1>
-        <div id="chat"></div>
-        <div id="main">
-            <input type="text" id="input" placeholder="Type a message...">
-            <button onclick="sendMessage()">Send</button>
-        </div>
-    </div>
 
-    <script>
-        async function sendMessage() {
-            const input = document.getElementById("input");
-            const chat = document.getElementById("chat");
+  <header>
+    <h1>NanoChat</h1>
+  </header>
 
-            const message = input.value;
-            if (!message) return;
+  <div id="chat"></div>
 
-            chat.innerHTML += `<p><b>You:</b> ${message}</p>`;
-            input.value = "";
-            input.disabled = true;
+  <div id="main">
+    <input type="text" id="input" placeholder="Type a message..." onkeydown="if(event.key==='Enter') sendMessage()">
+    <button id="sendBtn" onclick="sendMessage()">Send</button>
+  </div>
 
-            chat.innerHTML += `<p> <i>Thinking...</i></p>`;
-            chat.scrollTop = chat.scrollHeight;
+  <script>
+    async function sendMessage() {
+      const input   = document.getElementById("input");
+      const chat    = document.getElementById("chat");
+      const sendBtn = document.getElementById("sendBtn");
 
-            try {
-                const response = await fetch("http://localhost:3000/chat", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        'Authorization':"Bearer ${localStorage.getItem('token')}"
-                    },
-                    body: JSON.stringify({ message }),
-                });
+      const message = input.value.trim();
+      if (!message) return;
 
-                const data = await response.json();
-                chat.innerHTML = chat.innerHTML.replace(`<i>Thinking...</i>`, `<b>Bot:</b> ${data.reply}`);
-                chat.scrollTop = chat.scrollHeight;
-            } catch (error) {
-                console.error("Error:", error);
-                chat.innerHTML = chat.innerHTML.replace(`<i>Thinking...</i>`, `<b>Bot:</b> Something went wrong. Please try again later.`);
-            }
+      const token = localStorage.getItem("token");
+      if (!token) { window.location = "/"; return; }
 
-            input.disabled = false;
-        }
-    </script>
+      // Append user bubble
+      const userDiv = document.createElement("div");
+      userDiv.className = "msg you";
+      userDiv.textContent = message;
+      chat.appendChild(userDiv);
+
+      input.value = "";
+      input.disabled = true;
+      sendBtn.disabled = true;
+
+      // Append bot bubble with animated thinking dots
+      const botDiv = document.createElement("div");
+      botDiv.className = "msg bot";
+      botDiv.innerHTML = `<div class="thinking-dots"><span></span><span></span><span></span></div>`;
+      chat.appendChild(botDiv);
+      chat.scrollTop = chat.scrollHeight;
+
+      try {
+        const response = await fetch("https://nanochat-6ypd.onrender.com/chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({ message }),
+        });
+
+        const data = await response.json();
+        botDiv.textContent = data.reply || "No response.";
+      } catch (error) {
+        console.error("Error:", error);
+        botDiv.textContent = "Something went wrong. Please try again.";
+      }
+
+      chat.scrollTop = chat.scrollHeight;
+      input.disabled = false;
+      sendBtn.disabled = false;
+      input.focus();
+    }
+  </script>
+
 </body>
 </html>
