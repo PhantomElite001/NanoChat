@@ -65,9 +65,10 @@ function authorize(req,res,next){
 
 
 // AI endpoint
-app.post("/chat", authorize ,async (req, res) => {
+app.post("/chat", async (req, res) => {
   try {
     const { message } = req.body;
+    console.log("Received message:", message);
 
     if (!message) {
       return res.status(400).json({ error: "Message is required." });

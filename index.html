@@ -95,7 +95,7 @@ button:hover {
             input.value = "";
             input.disabled = true;
 
-            chat.innerHTML += `<p><b>Bot:</b> <i>Thinking...</i></p>`;
+            chat.innerHTML += `<p> <i>Thinking...</i></p>`;
             chat.scrollTop = chat.scrollHeight;
 
             try {
@@ -103,6 +103,7 @@ button:hover {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
+                        'Authorization':"Bearer ${localStorage.getItem('token')}"
                     },
                     body: JSON.stringify({ message }),
                 });
