@@ -123,6 +123,10 @@ app.post("/chat", authorize, async (req, res) => {
     }),
   }
 );
+    if (!response.ok) {
+      console.log("API error", await response.text());
+      return res.status(500).json({ error: "AI API error." });
+    }
     console.log("sent");
     const data = await response.json();
     const reply = data.choices?.[0]?.message?.content || "No response";
