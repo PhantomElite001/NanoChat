@@ -180,6 +180,10 @@
       });
 
       const data = await res.json();
+      if(!data.token){
+          alert(data.error || "Login failed");
+          return;
+      }
       localStorage.setItem("token", data.token);
       window.location = "/app";
     }
