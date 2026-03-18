@@ -165,6 +165,9 @@
   </div>
 
   <script>
+      if(localStorage.getItem("token")){
+        localStorage.removeItem("token");
+    }
     async function login() {
       const token=localStorage.getItem('token');
       if(token){
