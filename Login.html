@@ -165,6 +165,9 @@
   </div>
 
   <script>
+    if(localStorage.getItem("token")){
+        localStorage.removeItem("token");
+    }
     async function login() {
       const token=localStorage.getItem('token');
       if(token){
@@ -173,7 +176,7 @@
       const username = document.getElementById("user").value;
       const password = document.getElementById("pass").value;
 
-      const res = await fetch("https://nanochat-6ypd.onrender.com/login", {
+      const res = await fetch("/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: username, password })

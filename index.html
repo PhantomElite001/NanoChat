@@ -237,7 +237,7 @@
       chat.scrollTop = chat.scrollHeight;
 
       try {
-        const response = await fetch("https://nanochat-6ypd.onrender.com/chat", {
+        const response = await fetch("/chat", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
