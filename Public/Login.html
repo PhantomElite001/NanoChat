@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>NanoChat — Register</title>
+    <title>NanoChat — Login</title>
     <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
     <style>
       :root {
@@ -13,9 +13,9 @@
         --surface2: #1e1e21;
         --border: #2a2a2e;
         --accent: #00e5ff;
-        --accent-dim: rgba(0, 229, 255, 0.08);
         --text: #e8e8ec;
         --text-dim: #666672;
+        --error: #ff4d4d;
       }
 
       *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -123,6 +123,14 @@
 
       button:hover  { opacity: 0.85; }
       button:active { transform: scale(0.98); }
+      button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+      .error-msg {
+        font-size: 0.82rem;
+        color: var(--error);
+        text-align: center;
+        min-height: 1.2em;
+      }
 
       .footer-link {
         text-align: center;
@@ -147,38 +155,72 @@
   </header>
 
   <div class="card">
-    <h2>Register</h2>
+    <h2>Login</h2>
 
     <div class="field">
-      <label for="user">Username</label>
-      <input id="user" type="text" placeholder="Choose a username">
+      <label for="user">Email</label>
+      <input id="user" type="email" placeholder="Enter your email">
     </div>
 
     <div class="field">
       <label for="pass">Password</label>
-      <input id="pass" type="password" placeholder="Choose a password">
+      <input id="pass" type="password" placeholder="Enter password"
+             onkeydown="if(event.key==='Enter') login()">
     </div>
 
-    <button onclick="Register()">Register</button>
+    <p class="error-msg" id="error"></p>
 
-    <p class="footer-link">Already have an account? <a href="/login">Login</a></p>
+    <button id="loginBtn" onclick="login()">Login</button>
+
+    <p class="footer-link">No account? <a href="/register">Register</a></p>
   </div>
 
   <script>
-    async function Register() {
-      const name = document.getElementById('user').value;
-      const password = document.getElementById('pass').value;
+    // If already logged in, skip login page
+    if (localStorage.getItem("token")) {
+      window.location = "/app";
+    }
 
-      const response = await fetch('/register', {
-        method: 'POST',
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, password })
-      });
+    async function login() {
+      const email    = document.getElementById("user").value.trim();
+      const password = document.getElementById("pass").value;
+      const errorEl  = document.getElementById("error");
+      const btn      = document.getElementById("loginBtn");
 
-      if (response.status !== 200) {
-        return "something went wrong";
+      errorEl.textContent = "";
+
+      if (!email || !password) {
+        errorEl.textContent = "Please fill in both fields.";
+        return;
       }
-      window.location = '/login';
+
+      btn.disabled = true;
+      btn.textContent = "Logging in...";
+
+      try {
+        const res  = await fetch("/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+
+        if (!res.ok || !data.token) {
+          // Fixed: was storing "undefined" in localStorage and redirecting anyway
+          errorEl.textContent = data.error || "Login failed.";
+          btn.disabled = false;
+          btn.textContent = "Login";
+          return;
+        }
+
+        localStorage.setItem("token", data.token);
+        window.location = "/app";
+
+      } catch (err) {
+        errorEl.textContent = "Network error. Try again.";
+        btn.disabled = false;
+        btn.textContent = "Login";
+      }
     }
   </script>
 

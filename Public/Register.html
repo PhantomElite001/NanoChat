@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>NanoChat — Login</title>
+    <title>NanoChat — Register</title>
     <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
     <style>
       :root {
@@ -147,44 +147,38 @@
   </header>
 
   <div class="card">
-    <h2>Login</h2>
+    <h2>Register</h2>
 
     <div class="field">
-      <label for="user">Username</label>
-      <input id="user" type="text" placeholder="Enter username">
+      <label for="user">Email</label>
+      <input id="user" type="text" placeholder="Choose a username">
     </div>
 
     <div class="field">
       <label for="pass">Password</label>
-      <input id="pass" type="password" placeholder="Enter password">
+      <input id="pass" type="password" placeholder="Choose a password">
     </div>
 
-    <button onclick="login()">Login</button>
+    <button onclick="Register()">Register</button>
 
-    <p class="footer-link">No account? <a href="/register">Register</a></p>
+    <p class="footer-link">Already have an account? <a href="/login">Login</a></p>
   </div>
 
   <script>
-    if(localStorage.getItem("token")){
-        localStorage.removeItem("token");
-    }
-    async function login() {
-      const token=localStorage.getItem('token');
-      if(token){
-          return window.location="/app";
-};
-      const username = document.getElementById("user").value;
-      const password = document.getElementById("pass").value;
+    async function Register() {
+      const email = document.getElementById('user').value;
+      const password = document.getElementById('pass').value;
 
-      const res = await fetch("/login", {
-        method: "POST",
+      const response = await fetch('/register', {
+        method: 'POST',
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: username, password })
+        body: JSON.stringify({ email, password })
       });
 
-      const data = await res.json();
-      localStorage.setItem("token", data.token);
-      window.location = "/app";
+      if (response.status !== 200) {
+        return "something went wrong";
+      }
+      window.location = '/login';
     }
   </script>
 
